@@ -1,0 +1,70 @@
+# Vagrant Cache With Squid Debian Proxy
+
+When running repeated Debian installations with package installation, using
+a local caching proxy can prevent fetching each package each time from the
+installation servers in the Internet.
+
+One popular option is apt-cacher-ng, but I kept getting "Hash Mismatch",
+errors, so I switched to the Squid Debian Proxy.
+
+This HowTo will walk you through creating your own instance.
+
+# Configuring the Vagrant Instance
+
+The "Vagrantfile" describes a single vagrant instance is a recent debian
+image with a single provision script:
+
+    Vagrant.configure(2) do |config|
+        config.vm.box = "debian/jessie64"
+        config.vm.provision :shell, :path => "provision.sh"
+    end
+
+By default, the vagrant instance stores the data in the instance file
+system image. To prevent the cache from being deleted when the instance
+is destroyed, the cache must be saved to the /vagrant directory on the guest
+instance, which is mapped to the host file system. These modifications,
+plus one for the proxy access control lists, are made in the following
+files:
+
+- /etc/squid-deb-proxy/squid-deb-proxy.conf
+- /usr/share/squid-deb-proxy/init-common.sh
+
+These modifications above have been put together in the patch file
+squid-deb-proxy.patch that is applied in the provision.sh script.
+
+The script "provision.sh" has the bare necessities to install the
+squid-deb-proxy package and apply the configuration patch:
+
+    #!/bin/bash
+    #
+    # Provision Squid Debian Proxy
+    
+    apt-get update
+    apt-get install -y squid-deb-proxy
+    /etc/init.d/squid-deb-proxy stop
+    (cd / && patch -p1 < /vagrant/cache/squid-deb-proxy.patch)
+    chown -R vagrant.vagrant /var/log/squid-deb-proxy
+    /etc/init.d/squid-deb-proxy start
+
+# Running the Vagrant Cache Instance
+
+    vagrant up
+
+# Troubleshooting
+
+Start by checking whether any files are written to the local cache directory:
+
+    find cache -type f | wc -l
+
+Next, connect to the vagrant instance with SSH:
+
+    vagrant ssh
+
+In the SSH session to the vagrant instance, try the following:
+
+    # List running processes
+    ps -ef | grep squid-deb-proxy
+
+    # Watch logfile for connections
+    tail -f /var/log/squid-deb-proxy/access.log
+
