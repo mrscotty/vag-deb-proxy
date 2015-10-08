@@ -1,6 +1,6 @@
 diff -rupN orig/etc/squid-deb-proxy/squid-deb-proxy.conf new/etc/squid-deb-proxy/squid-deb-proxy.conf
 --- orig/etc/squid-deb-proxy/squid-deb-proxy.conf	2015-10-07 18:21:11.000000000 +0200
-+++ new/etc/squid-deb-proxy/squid-deb-proxy.conf	2015-10-07 18:22:20.000000000 +0200
++++ new/etc/squid-deb-proxy/squid-deb-proxy.conf	2015-10-08 10:07:47.000000000 +0200
 @@ -10,6 +10,10 @@
  
  # settings that you may want to customize
@@ -17,7 +17,7 @@ diff -rupN orig/etc/squid-deb-proxy/squid-deb-proxy.conf new/etc/squid-deb-proxy
  
  # use a different dir than stock squid and default to 40G
 -cache_dir aufs /var/cache/squid-deb-proxy 40000 16 256
-+cache_dir aufs /vagrant/cache 40000 16 256
++cache_dir aufs /vagrant/data 40000 16 256
  
  # use different logs
  cache_access_log /var/log/squid-deb-proxy/access.log
@@ -48,7 +48,7 @@ diff -rupN orig/etc/squid-deb-proxy/squid-deb-proxy.conf new/etc/squid-deb-proxy
  netdb_filename stdio:/var/log/squid-deb-proxy/netdb.state
 diff -rupN orig/usr/share/squid-deb-proxy/init-common.sh new/usr/share/squid-deb-proxy/init-common.sh
 --- orig/usr/share/squid-deb-proxy/init-common.sh	2015-10-07 18:21:41.000000000 +0200
-+++ new/usr/share/squid-deb-proxy/init-common.sh	2015-10-07 18:22:27.000000000 +0200
++++ new/usr/share/squid-deb-proxy/init-common.sh	2015-10-08 10:08:04.000000000 +0200
 @@ -32,9 +32,9 @@ pre_start() {
    fi
  
@@ -56,9 +56,9 @@ diff -rupN orig/usr/share/squid-deb-proxy/init-common.sh new/usr/share/squid-deb
 -  install -d -o proxy -g proxy -m 750 /var/cache/squid-deb-proxy/
 -  install -d -o proxy -g proxy -m 750 /var/log/squid-deb-proxy/
 -  if [ ! -d /var/cache/squid-deb-proxy/00 ]; then
-+  install -d -o vagrant -g vagrant -m 750 /vagrant/cache/
++  install -d -o vagrant -g vagrant -m 750 /vagrant/data/
 +  install -d -o vagrant -g vagrant -m 750 /var/log/squid-deb-proxy/
-+  if [ ! -d /vagrant/cache/00 ]; then
++  if [ ! -d /vagrant/data/00 ]; then
     $SQUID -z -N -f /etc/squid-deb-proxy/squid-deb-proxy.conf
    fi
  
